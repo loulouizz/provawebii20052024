@@ -1,0 +1,17 @@
+[
+    {
+        "question": "Qual é a capital da França?",
+        "choices": ["Paris", "Londres", "Berlim", "Madri"],
+        "answer": "Paris"
+    },
+    {
+        "question": "Qual é o maior planeta do nosso sistema solar?",
+        "choices": ["Terra", "Marte", "Júpiter", "Saturno"],
+        "answer": "Júpiter"
+    },
+    {
+        "question": "Quem pintou a Mona Lisa?",
+        "choices": ["Van Gogh", "Picasso", "Leonardo da Vinci", "Michelangelo"],
+        "answer": "Leonardo da Vinci"
+    }
+]
