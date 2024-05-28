@@ -1,12 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
     const messagesDiv = document.getElementById("messages");
-
-    const socket = new WebSocket("ws://localhost:8080");
-
-    var botao = document.getElementById('butao');
-    botao.addEventListener('click', function(){
-        alert('Bem vindo!');
-    });
+    const loginDiv = document.getElementById("loginDiv");
+    const nicknameInput = document.getElementById("nicknameInput");
+    const joinButton = document.getElementById("joinButton");
+    const questionDiv = document.getElementById("questionDiv");
+    const buttonsDiv = document.getElementById("buttonsDiv");
+    const timerDiv = document.getElementById("timerDiv");
+    const resultPopup = document.getElementById("resultPopup");
+    const resultMessage = document.getElementById("resultMessage");
+    const closePopup = document.getElementById("closePopup");
+    const playAgainButton = document.getElementById("playAgainButton");
+    let nickname;
+    let socket;
+    let timerInterval;
 
     const displayMessage = (message) => {
         const messageElement = document.createElement("div");
@@ -14,19 +20,99 @@ document.addEventListener("DOMContentLoaded", () => {
         messagesDiv.appendChild(messageElement);
     };
 
-    socket.addEventListener("open", () => {
-        displayMessage("Conectado ao servidor WebSocket");
-    });
+    const displayQuestion = (question) => {
+        questionDiv.textContent = question;
+    };
 
-    socket.addEventListener("message", (event) => {
-        displayMessage(`Mensagem do servidor: ${event.data}`);
-    });
+    const createAnswerButtons = (choices) => {
+        buttonsDiv.innerHTML = '';
+        choices.forEach(choice => {
+            const button = document.createElement("button");
+            button.textContent = choice;
+            button.addEventListener("click", () => {
+                socket.send(JSON.stringify({ type: 'answer', nickname: nickname, answer: choice }));
+            });
+            buttonsDiv.appendChild(button);
+        });
+    };
 
-    socket.addEventListener("close", () => {
-        displayMessage("Desconectado do servidor WebSocket");
-    });
+    const showPopup = (message) => {
+        resultMessage.innerHTML = message;
+        resultPopup.style.display = "block";
+    };
 
-    socket.addEventListener("error", (error) => {
-        displayMessage(`Erro: ${error.message}`);
+    const hidePopup = () => {
+        resultPopup.style.display = "none";
+    };
+
+    const startTimer = (duration) => {
+        let timeRemaining = duration;
+        timerDiv.textContent = `Tempo restante: ${timeRemaining} segundos`;
+
+        timerInterval = setInterval(() => {
+            timeRemaining -= 1;
+            timerDiv.textContent = `Tempo restante: ${timeRemaining} segundos`;
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+            }
+        }, 1000);
+    };
+
+    const stopTimer = () => {
+        clearInterval(timerInterval);
+        timerDiv.textContent = '';
+    };
+
+    closePopup.onclick = function() {
+        hidePopup();
+    };
+
+    playAgainButton.onclick = function() {
+        hidePopup();
+        socket.send(JSON.stringify({ type: 'playAgain', nickname: nickname }));
+    };
+
+    joinButton.addEventListener("click", () => {
+        nickname = nicknameInput.value;
+        if (nickname) {
+            socket = new WebSocket("ws://localhost:3000");
+
+            socket.addEventListener("open", () => {
+                socket.send(JSON.stringify({ type: 'join', nickname: nickname }));
+            });
+
+            socket.addEventListener("message", (event) => {
+                const message = JSON.parse(event.data);
+                if (message.type === 'join' && message.success === false) {
+                    displayMessage("Nickname já está em uso. Por favor, escolha outro.");
+                } else if (message.type === 'waiting') {
+                    displayMessage(message.message);
+                } else if (message.type === 'question') {
+                    loginDiv.style.display = 'none'; 
+                    questionDiv.innerHTML = ''; 
+                    displayQuestion(message.question.question);
+                    createAnswerButtons(message.question.choices);
+                } else if (message.type === 'result') {
+                    stopTimer();
+                    let resultHtml = `Vencedor: ${message.winner}<br>`;
+                    message.scores.forEach(score => {
+                        resultHtml += `${score.nickname}: ${score.score} pontos<br>`;
+                    });
+                    showPopup(resultHtml);
+                } else if (message.type === 'timer') {
+                    startTimer(message.duration);
+                }
+            });
+
+            socket.addEventListener("close", () => {
+                displayMessage("Desconectado do servidor WebSocket");
+            });
+
+            socket.addEventListener("error", (error) => {
+                displayMessage(`Erro: ${error.message}`);
+            });
+        } else {
+            displayMessage("Por favor, insira um nickname.");
+        }
     });
 });
