@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginDiv = document.getElementById("loginDiv");
     const nicknameInput = document.getElementById("nicknameInput");
     const joinButton = document.getElementById("joinButton");
+    const spinner = document.getElementById("spinner");
     const questionDiv = document.getElementById("questionDiv");
     const buttonsDiv = document.getElementById("buttonsDiv");
     const timerDiv = document.getElementById("timerDiv");
@@ -17,11 +18,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const displayMessage = (message) => {
         const messageElement = document.createElement("div");
         messageElement.textContent = message;
+        while (messagesDiv.firstChild) {
+            messagesDiv.removeChild(messagesDiv.firstChild);
+        }
         messagesDiv.appendChild(messageElement);
     };
 
+    const clearMessages = () => {
+        while (messagesDiv.firstChild) {
+            messagesDiv.removeChild(messagesDiv.firstChild);
+        }
+    };
+    
     const displayQuestion = (question) => {
         questionDiv.textContent = question;
+        clearMessages();
     };
 
     const createAnswerButtons = (choices) => {
@@ -63,6 +74,15 @@ document.addEventListener("DOMContentLoaded", () => {
         timerDiv.textContent = '';
     };
 
+    const resetUI = () => {
+        
+        questionDiv.innerHTML = '';
+        buttonsDiv.innerHTML = '';
+        timerDiv.textContent = '';
+        timerDiv.innerHTML = ''; //10/06 00:13
+        loginDiv.style.display = 'block';
+    };
+
     closePopup.onclick = function() {
         hidePopup();
     };
@@ -87,11 +107,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     displayMessage("Nickname já está em uso. Por favor, escolha outro.");
                 } else if (message.type === 'waiting') {
                     displayMessage(message.message);
+                    spinner.style.display = 'block';
                 } else if (message.type === 'question') {
                     loginDiv.style.display = 'none'; 
                     questionDiv.innerHTML = ''; 
                     displayQuestion(message.question.question);
                     createAnswerButtons(message.question.choices);
+                    spinner.style.display = 'none';
                 } else if (message.type === 'result') {
                     stopTimer();
                     let resultHtml = `Vencedor: ${message.winner}<br>`;
@@ -99,6 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         resultHtml += `${score.nickname}: ${score.score} pontos<br>`;
                     });
                     showPopup(resultHtml);
+                    resetUI();
                 } else if (message.type === 'timer') {
                     startTimer(message.duration);
                 }

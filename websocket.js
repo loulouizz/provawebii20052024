@@ -41,6 +41,7 @@ function sendToAll(message) {
 function startGame() {
     gameStarted = true;
     currentQuestionIndex = 0;
+    timerStarted = false; // Resetar a flag do temporizador
     sendQuestion();
     if (!timerStarted) {
         timerStarted = true;
@@ -57,6 +58,7 @@ function sendQuestion() {
 function endGame() {
     clearTimeout(gameEndTimeout);
     gameStarted = false;
+    timerStarted = false; // Resetar a flag do temporizador
     const scores = Object.values(players).map(player => ({ nickname: player.nickname, score: player.score }));
     scores.sort((a, b) => b.score - a.score);
     const winner = scores[0].nickname;
@@ -67,9 +69,10 @@ function endGame() {
     Object.values(players).forEach(player => player.score = 0);
 
     // Adicionar jogadores à fila de espera para a próxima rodada
-    Object.values(players).forEach(player => waitingPlayers.push(player));
+    //Object.values(players).forEach(player => waitingPlayers.push(player));
     Object.keys(players).forEach(nickname => delete players[nickname]);
 
+    // Iniciar nova rodada apenas se houver pelo menos dois jogadores
     if (waitingPlayers.length >= 2) {
         Object.assign(players, ...waitingPlayers.map(player => ({ [player.nickname]: player })));
         waitingPlayers.length = 0;
@@ -92,9 +95,9 @@ wss.on('connection', (ws) => {
             } else {
                 players[nickname] = { nickname: nickname, ws: ws, score: 0 };
                 ws.send(JSON.stringify({ type: 'join', success: true }));
-                if (playerCount >= 2 && !gameStarted) {
+                if (Object.keys(players).length >= 2 && !gameStarted) {
                     startGame();
-                } else if (playerCount === 1) {
+                } else if (Object.keys(players).length === 1) {
                     ws.send(JSON.stringify({ type: 'waiting', message: 'Aguardando outro jogador...' }));
                 }
             }
@@ -113,7 +116,7 @@ wss.on('connection', (ws) => {
                 }
             }
         } else if (parsedMessage.type === 'playAgain') {
-            const player = players[parsedMessage.nickname];
+            const player = waitingPlayers.find(p => p.nickname === parsedMessage.nickname) || players[parsedMessage.nickname];
             if (player) {
                 waitingPlayers.push(player);
                 if (!gameStarted && waitingPlayers.length >= 2) {

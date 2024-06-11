@@ -32,7 +32,7 @@
     {
         "question": "Qual a montanha mais alta do mundo?",
         "choices": ["K2", "Kangchenjunga", "Everest", "Lhotse"],
-        "answer": "Everest"
+        "answer": "Everest" 
     },
     {
         "question": "Qual é o oceano que banha o Brasil?",
@@ -47,6 +47,6 @@
     {
         "question": "Qual é o país com a maior população do mundo?",
         "choices": ["Índia", "Estados Unidos", "China", "Rússia"],
-        "answer": "China"
+        "answer": "Índia"
     }
 ]

@@ -26,7 +26,7 @@ input[type="text"] {
 button {
     padding: 10px 20px;
     margin-top: 10px;
-    background-color: #4CAF50; /* Cor verde */
+    background-color: #4CAF50;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -34,7 +34,7 @@ button {
 }
 
 button:hover {
-    background-color: #45a049; /* Cor mais escura no hover */
+    background-color: #45a049;
 }
 
 .popup {
@@ -46,6 +46,22 @@ button:hover {
     background-color: rgba(0, 0, 0, 0.5);
     width: 100%;
     height: 100%;
+}
+
+.spinner {
+    display: none;
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .popup-content {
@@ -69,4 +85,8 @@ button:hover {
 #buttonsDiv,
 #timerDiv {
     margin-top: 20px;
+}
+
+button {
+    margin: 5px; /* Adiciona um espaço de 5px entre os botões */
 }
