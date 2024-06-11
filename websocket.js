@@ -69,7 +69,6 @@ function endGame() {
     Object.values(players).forEach(player => player.score = 0);
 
     // Adicionar jogadores à fila de espera para a próxima rodada
-    //Object.values(players).forEach(player => waitingPlayers.push(player));
     Object.keys(players).forEach(nickname => delete players[nickname]);
 
     // Iniciar nova rodada apenas se houver pelo menos dois jogadores

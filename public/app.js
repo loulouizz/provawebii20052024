@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
             messagesDiv.removeChild(messagesDiv.firstChild);
         }
     };
-    
+
     const displayQuestion = (question) => {
         questionDiv.textContent = question;
         clearMessages();
@@ -75,12 +75,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const resetUI = () => {
-        
         questionDiv.innerHTML = '';
         buttonsDiv.innerHTML = '';
         timerDiv.textContent = '';
-        timerDiv.innerHTML = ''; //10/06 00:13
         loginDiv.style.display = 'block';
+        clearMessages();
+    };
+
+    const resetGame = () => {
+        stopTimer();
+        resetUI();
+        if (socket) {
+            socket.close();
+        }
     };
 
     closePopup.onclick = function() {
@@ -89,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     playAgainButton.onclick = function() {
         hidePopup();
-        socket.send(JSON.stringify({ type: 'playAgain', nickname: nickname }));
+        resetGame();
     };
 
     joinButton.addEventListener("click", () => {
@@ -99,12 +106,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             socket.addEventListener("open", () => {
                 socket.send(JSON.stringify({ type: 'join', nickname: nickname }));
+                joinButton.style.display = 'none';
             });
 
             socket.addEventListener("message", (event) => {
                 const message = JSON.parse(event.data);
                 if (message.type === 'join' && message.success === false) {
                     displayMessage("Nickname já está em uso. Por favor, escolha outro.");
+                    joinButton.style.display = 'block';
                 } else if (message.type === 'waiting') {
                     displayMessage(message.message);
                     spinner.style.display = 'block';
@@ -127,8 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
-            socket.addEventListener("close", () => {
-                displayMessage("Desconectado do servidor WebSocket");
+            socket.addEventListener("close", () => {    
+                //displayMessage("Desconectado do servidor WebSocket");
+                joinButton.style.display = 'block';
             });
 
             socket.addEventListener("error", (error) => {

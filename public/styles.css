@@ -87,6 +87,13 @@ button:hover {
     margin-top: 20px;
 }
 
+
+#joinButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
 button {
     margin: 5px; /* Adiciona um espaço de 5px entre os botões */
 }
